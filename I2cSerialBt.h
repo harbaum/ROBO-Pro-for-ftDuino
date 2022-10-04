@@ -14,6 +14,7 @@ public:
   int available();
   int availableForWrite();
   int read();
+  void read(int n, uint8_t *buf); 
   int peek();
   void flush();
   size_t write(uint8_t byte);

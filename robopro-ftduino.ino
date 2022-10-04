@@ -39,11 +39,11 @@ void setup()
   Serial.begin(TX_BAUD);  // ROBO TX Controller Serial UART (38400,8,n,1)
   ftduino.init();         // initialize ftDuino API
 
-#ifdef ENABLE_BTSERIAL
+#ifndef ENABLE_BTSERIAL
   Wire.begin();           // initialize I2C driver, join I2C bus as master (controller)
 #else
-  btSerial.begin(TX_BAUD);// the HC-05 needs to be prepared for the bitrate
-  Wire.setClock(400000);
+  btSerial.begin(38400);  // the HC-05 needs to be prepared for the bitrate
+  Wire.setClock(400000);  // well beyond the spec ...
   btSerial.key(0);
 #endif
 }
@@ -60,7 +60,8 @@ void fx1_write(unsigned char byte) {
 #endif
 
 void loop()
-{  
+{
+#if 0
   if (Serial && Serial.available() > 0) // check UART and read one symbol
   {
 #ifdef ENABLE_BTSERIAL
@@ -68,12 +69,19 @@ void loop()
 #endif
     fx1Parse(Serial.read());  // parse Fish.X1 protocol
   } 
+#endif
 
 #ifdef ENABLE_BTSERIAL
-  if (btSerial.available() > 0) 
+  unsigned char available = btSerial.available();
+  if (available > 0) 
   {
     use_bt = true;
-    fx1Parse(btSerial.read()); 
+    unsigned char buffer[available];
+    
+    btSerial.read(available, buffer);
+
+    for(char i=0;i<available;i++)
+      fx1Parse(buffer[i]); 
   } 
 #endif
 }

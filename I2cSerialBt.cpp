@@ -66,6 +66,15 @@ int I2cSerialBt::read() {
   return registerRead(2);
 }
 
+void I2cSerialBt::read(int n, uint8_t *buf) { 
+  Wire.beginTransmission(ADDR);
+  Wire.write(2 + ((n-1) << 2));
+  Wire.endTransmission(false); 
+  Wire.requestFrom(ADDR,n);
+  for(char i=0;i<n;i++)
+    buf[i] = Wire.read();
+}
+
 // peek does not work (yet) ...
 int I2cSerialBt::peek() { return 0; }
 
