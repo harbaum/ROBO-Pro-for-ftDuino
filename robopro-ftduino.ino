@@ -31,6 +31,7 @@
 #ifdef ENABLE_BTSERIAL
 #include "I2cSerialBt.h"
 I2cSerialBt btSerial;
+bool use_bt = false;
 #endif
 
 void setup()
@@ -47,13 +48,32 @@ void setup()
 #endif
 }
 
+#ifdef ENABLE_BTSERIAL
+void fx1_write(unsigned char byte) {
+  if(!use_bt)
+    Serial.write(byte);
+  else
+    btSerial.write(byte);
+} 
+#else
+#define write(a)   Serial.write(a)
+#endif
+
 void loop()
-{
-  if (Serial.available() > 0) // check UART and read one symbol
+{  
+  if (Serial && Serial.available() > 0) // check UART and read one symbol
+  {
+#ifdef ENABLE_BTSERIAL
+    use_bt = false;
+#endif
     fx1Parse(Serial.read());  // parse Fish.X1 protocol
+  } 
 
 #ifdef ENABLE_BTSERIAL
-  if (btSerial.available() > 0)
+  if (btSerial.available() > 0) 
+  {
+    use_bt = true;
     fx1Parse(btSerial.read()); 
+  } 
 #endif
 }

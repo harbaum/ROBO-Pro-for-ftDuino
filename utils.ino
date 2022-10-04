@@ -43,8 +43,8 @@ UINT32 get32BitLE(unsigned char *pData) {
     UINT32 value = 0;
     value  = *(pData+0);
     value += *(pData+1) << 8;
-    value += *(pData+2) << 16;
-    value += *(pData+3) << 24;
+    value += (UINT32)*(pData+2) << 16;
+    value += (UINT32)*(pData+3) << 24;
     return value;
 }
 

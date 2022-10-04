@@ -187,7 +187,7 @@ void sendX1Data(int replyCMD, short items, unsigned char *pData, short dataLengt
   
   packetLength += 3;
   for (i = 0; i < packetLength; i++)
-    Serial.write(txBuffer[i]);  // transmit packet (bytewise)
+    fx1_write(txBuffer[i]);  // transmit packet (bytewise)
 }
 
 // send function for reply to Shell request "get_ser_num"
@@ -197,7 +197,7 @@ void sendShellData(void) {
   
   sprintf((char*)txBuffer, "\r\nROBO TX-000/USB>get_ser_num\r\n0000000000\r\nROBO TX-000/USB>");
   for (i = 0; i < 0x3B; i++)
-    Serial.write(txBuffer[i]);  // transfer predefined replay data (remote console)
+    fx1_write(txBuffer[i]);  // transfer predefined replay data (remote console)
 }
 
 // execute callback functions according to command code (CMD) in received packet
@@ -226,7 +226,7 @@ void fx1ParseProcPacket(unsigned char *packetPtr) {
 }
 
 // set I2C speed
-
+#ifndef ENABLE_BTSERIAL
 void set_i2c_speed(BOOL8 fast) {
   if (fast) {  // change to fast mode
     if (i2c_speed == 1) {
@@ -241,6 +241,7 @@ void set_i2c_speed(BOOL8 fast) {
     }
   }
 }
+#endif
 
 // CMD 001: Connect Request, CMD 101: Connect Reply
 
@@ -510,6 +511,7 @@ void CMD_119_Reply(unsigned char *data) {
   TA_I2C_DATA *reply = (TA_I2C_DATA *) tmpData;  // reply data packet
   memset((unsigned char*)reply, 0, sizeof(TA_I2C_DATA));  // initialise data packet with zeros
 
+#ifndef ENABLE_BTSERIAL
   if (!i2c_ch_open)  // if no open I2C connection
     set_i2c_speed(request->i2c_config & 0x80);
 
@@ -531,7 +533,8 @@ void CMD_119_Reply(unsigned char *data) {
     while (Wire.available() < 0);
     reply->i2c_data[0] = Wire.read();
   }
-    
+#endif
+
   sendX1Data(CMD_119, 1, (unsigned char*)reply, sizeof(TA_I2C_DATA));  // send Fish.X1 reply packet
 }
 
@@ -541,7 +544,8 @@ void CMD_120_Reply(unsigned char *data) {
   TA_I2C_CMD *request = (TA_I2C_CMD *) data;
   TA_I2C_DATA *reply = (TA_I2C_DATA *) tmpData;  // reply data packet
   memset((unsigned char*)reply, 0, sizeof(TA_I2C_DATA));  // initialise data packet with zeros
-  
+
+#ifndef ENABLE_BTSERIAL  
   if (!i2c_ch_open)  // if no open I2C connection
     set_i2c_speed(request->i2c_config & 0x80);
 
@@ -557,6 +561,7 @@ void CMD_120_Reply(unsigned char *data) {
     Wire.write(request->i2c_data[0]);  // write at least one byte (8 bit data)
   }
   Wire.endTransmission();
+#endif
 
   memcpy((void*)(request->i2c_data), (void*)reply, 2);  // copy data to reply packet
   sendX1Data(CMD_120, 1, (unsigned char*)reply, 4);     // send Fish.X1 reply packet
