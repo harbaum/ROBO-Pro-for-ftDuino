@@ -24,15 +24,36 @@
 #include <Wire.h> 
 #include "fishx1.h"
 
+// enabling bluetooth serial will disable I2c support in this sketch as
+// the btserial adapter itself is connected via i2c
+#define ENABLE_BTSERIAL
+
+#ifdef ENABLE_BTSERIAL
+#include "I2cSerialBt.h"
+I2cSerialBt btSerial;
+#endif
+
 void setup()
 {
   Serial.begin(TX_BAUD);  // ROBO TX Controller Serial UART (38400,8,n,1)
   ftduino.init();         // initialize ftDuino API
+
+#ifdef ENABLE_BTSERIAL
   Wire.begin();           // initialize I2C driver, join I2C bus as master (controller)
+#else
+  btSerial.begin(TX_BAUD);// the HC-05 needs to be prepared for the bitrate
+  Wire.setClock(400000);
+  btSerial.key(0);
+#endif
 }
 
 void loop()
 {
   if (Serial.available() > 0) // check UART and read one symbol
     fx1Parse(Serial.read());  // parse Fish.X1 protocol
+
+#ifdef ENABLE_BTSERIAL
+  if (btSerial.available() > 0)
+    fx1Parse(btSerial.read()); 
+#endif
 }

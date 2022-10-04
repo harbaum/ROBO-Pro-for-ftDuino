@@ -1,5 +1,11 @@
 // 16 bit data access (little endian / big endian)
 
+// This code is meant to run on the ftDuino/AVR and thus is sure to 
+// expect a little endian
+#if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#error "Unexpected endianess"
+#endif
+
 void set16BitLE(unsigned char *pData, UINT16 value) {
     *(pData+0) = value & 0xFF;
     *(pData+1) = (value >> 8) & 0xFF;
