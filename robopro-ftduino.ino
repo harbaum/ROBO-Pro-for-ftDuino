@@ -46,6 +46,12 @@ void setup()
   Wire.setClock(400000);  // well beyond the spec ...
   btSerial.key(0);
 #endif
+
+  // wait a short moment for Serial (USB) to become available. Switch
+  // to bluetooth if it doesn't
+  uint32_t to = millis();
+  while (!Serial && millis()-to < 1000 );
+  if(!Serial) use_bt = true;
 }
 
 #ifdef ENABLE_BTSERIAL
@@ -61,15 +67,13 @@ void fx1_write(unsigned char byte) {
 
 void loop()
 {
-#if 0
-  if (Serial && Serial.available() > 0) // check UART and read one symbol
+  if (!use_bt && Serial && Serial.available() > 0) // check UART and read one symbol
   {
 #ifdef ENABLE_BTSERIAL
     use_bt = false;
 #endif
     fx1Parse(Serial.read());  // parse Fish.X1 protocol
   } 
-#endif
 
 #ifdef ENABLE_BTSERIAL
   unsigned char available = btSerial.available();

@@ -1,21 +1,17 @@
 // 16 bit data access (little endian / big endian)
 
 // This code is meant to run on the ftDuino/AVR and thus is sure to 
-// expect a little endian
+// run on a little endian
 #if __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
 #error "Unexpected endianess"
 #endif
 
 void set16BitLE(unsigned char *pData, UINT16 value) {
-    *(pData+0) = value & 0xFF;
-    *(pData+1) = (value >> 8) & 0xFF;
+    *(UINT16*)pData = value;
 }
 
 UINT16 get16BitLE(unsigned char *pData) {
-    UINT16 value = 0;
-    value  = *(pData+0);
-    value += (*(pData+1) << 8) & 0xFF00;
-    return value;
+    return *(UINT16*)pData;
 }
 
 void set16BitBE(unsigned char *pData, UINT16 value) {
@@ -33,19 +29,11 @@ UINT16 get16BitBE(unsigned char *pData) {
 // 32 bit data access (little endian / big endian)
 
 void set32BitLE(unsigned char *pData, UINT32 value) {
-    *(pData+0) = value & 0xFF;
-    *(pData+1) = (value >> 8)  & 0xFF;
-    *(pData+2) = (value >> 16) & 0xFF;
-    *(pData+3) = (value >> 24) & 0xFF;
+    *(UINT32*)pData = value;     
 }
 
 UINT32 get32BitLE(unsigned char *pData) {
-    UINT32 value = 0;
-    value  = *(pData+0);
-    value += *(pData+1) << 8;
-    value += (UINT32)*(pData+2) << 16;
-    value += (UINT32)*(pData+3) << 24;
-    return value;
+    return *(UINT32*)pData;
 }
 
 void set32BitBE(unsigned char *pData, UINT32 value) {
